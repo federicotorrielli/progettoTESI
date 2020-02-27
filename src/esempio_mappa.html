@@ -2,10 +2,12 @@
 <head>
     <script src='https://code.jquery.com/jquery-3.4.1.min.js' type='text/javascript'></script>
     <link href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" rel="stylesheet"/>
-    <link href="plugins/mui-0.10.1/css/mui.css" rel="stylesheet"/>
+    <link href="//cdn.muicss.com/mui-0.10.1/css/mui.min.css" rel="stylesheet"/>
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" type="text/javascript"></script>
     <link href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" rel="stylesheet"/>
-    <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
-    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"
+            type="text/javascript"></script>
+    <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
     <style media="screen">
         #map {
             width: 100%;
@@ -30,8 +32,6 @@
         zoom: 15
     });
 
-    L.PM.initialize({optIn: true});
-
     L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         subdomains: ['a', 'b', 'c']
@@ -44,36 +44,41 @@
         }).addTo(map);
     });
 
-    let clickCircle = undefined;
-
-    function onMapClick(e) {
-        if (buttonPressed) {
-            if (clickCircle !== undefined) {
-                map.removeLayer(clickCircle);
-            }
-            clickCircle = L.circle(e.latlng, 100 * 3, {
-                color: '#f07300',
-                fillOpacity: 0.1,
-                opacity: 0.5,
-            }).addTo(map);
-        }
+    function clickHandler(e) {
+        console.log(e.layer._latlng);
+        console.log(e.layer._mRadius);
+        console.log(e);
+        $.get("https://beta.ontomap.ontomap.eu/features?lat=" + e.layer.getLatLng().lat + "&lng=" + e.layer.getLatLng().lng + "&maxDistance=" + e.layer.getRadius(), function (geoJsonFeature) {
+            geoJsonFeature.features.forEach((item, i) => {
+                let circle = turf.circle([e.layer.getLatLng().lng,e.layer.getLatLng().lat],  e.layer.getRadius()/1000);
+                let intersect =  turf.intersect(circle,item);
+                L.geoJSON(intersect, {
+                    onEachFeature(feature, layer) {
+                        layer.bindPopup(L.popup({maxHeight: 200}, layer).setContent(item.properties.label));
+                    }
+                }).addTo(map)
+            });
+        });
     }
 
     function buttonPressedMap() {
         buttonPressed = !buttonPressed;
+        map.pm.addControls({
+            position: 'topleft',
+            drawMarker: false,
+            drawPolyline: false,
+            drawRectangle: false,
+            drawPolygon: false,
+            cutPolygon: false,
+        });
+        map.pm.setLang('it');
         if (buttonPressed)
             document.getElementById("bottone1").innerText = "Disattiva Funzione";
         else
             document.getElementById("bottone1").innerText = "Attiva Funzione";
     }
 
-    map.pm.addControls({
-        position: 'topleft',
-        drawCircle: false,
-        // Qua disattivo tutto tranne drawCircle todo
-    });
-
-    map.on('click', onMapClick);
+    map.on('pm:create', e => clickHandler(e));
 </script>
 </body>
 </html>
