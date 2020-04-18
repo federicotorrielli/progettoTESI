@@ -46,8 +46,15 @@
     }).addTo(map);
 
     function clickHandler(e) {
+        if (e.layer.getRadius() > 400) {
+            attivaToast("Il cerchio è troppo grande, riprova!", "error", "#e74c3c");
+            map.removeLayer(e.layer)
+            return;
+        }
+
         if (circleLayer !== undefined && circleFigure !== undefined)
             removalHandler(circleFigure, true);
+
         circleFigure = e.layer;
         circleFigure.on('pm:dragend', ev => editHandler(ev));
         $.get("https://beta.ontomap.ontomap.eu/features?lat=" + e.layer.getLatLng().lat + "&lng=" + e.layer.getLatLng().lng + "&maxDistance=" + e.layer.getRadius(), function (geoJsonFeature) {
@@ -65,7 +72,7 @@
                                     iconAnchor: [12, 40],
                                     popupAnchor: [1, -38],
                                 }));
-                                attivaToast(true);
+                                attivaToast("Posizione salvata", "info", "#2980b9");
                             } else {
                                 layer.myTag = "circleLayer";
                                 layer.setIcon(new L.Icon({
@@ -74,7 +81,7 @@
                                     iconAnchor: [12, 40],
                                     popupAnchor: [1, -38],
                                 }));
-                                attivaToast(false);
+                                attivaToast("Posizione cancellata", "info", "#e74c3c");
                             }
                         }))[0];
                         if (layer.myTag === undefined)
@@ -135,6 +142,7 @@
     function editHandler(e) {
         if (circleLayer !== undefined && circleFigure !== undefined)
             removalHandler(circleFigure, false);
+
         circleFigure = e.target;
         $.get("https://beta.ontomap.ontomap.eu/features?lat=" + e.target.getLatLng().lat + "&lng=" + e.target.getLatLng().lng + "&maxDistance=" + e.target.getRadius(), function (geoJsonFeature) {
             geoJsonFeature.features.forEach((item, i) => {
@@ -151,7 +159,7 @@
                                     iconAnchor: [12, 40],
                                     popupAnchor: [1, -38],
                                 }));
-                                attivaToast(true);
+                                attivaToast("Posizione salvata", "info", "#2980b9");
                             } else {
                                 layer.myTag = "circleLayer";
                                 layer.setIcon(new L.Icon({
@@ -160,7 +168,7 @@
                                     iconAnchor: [12, 40],
                                     popupAnchor: [1, -38],
                                 }));
-                                attivaToast(false);
+                                attivaToast("Posizione cancellata", "info", "#e74c3c");
                             }
                         }))[0];
                         if (layer.myTag === undefined)
@@ -173,36 +181,21 @@
         });
     }
 
-    function attivaToast(attivoDisattivo) {
-        if (attivoDisattivo === true)
-            $.toast({
-                text: "Posizione salvata",
-                heading: 'Avviso',
-                icon: 'info',
-                showHideTransition: 'fade',
-                allowToastClose: true,
-                hideAfter: 3000,
-                stack: 5,
-                position: 'bottom-left',
-                textAlign: 'left',
-                loader: true,
-                loaderBg: '#9EC600',
-            });
-        else
-            $.toast({
-                text: "Posizione annullata",
-                heading: 'Avviso',
-                icon: 'info',
-                showHideTransition: 'fade',
-                allowToastClose: true,
-                hideAfter: 3000,
-                stack: 5,
-                position: 'bottom-left',
-                textAlign: 'left',
-                loader: true,
-                loaderBg: '#9EC600',
-                bgColor: '#E74C3C',
-            });
+    function attivaToast(dati, cond, bgColor) {
+        $.toast({
+            text: dati,
+            heading: 'Avviso',
+            icon: cond,
+            showHideTransition: 'fade',
+            allowToastClose: true,
+            hideAfter: 3000,
+            stack: 5,
+            position: 'bottom-left',
+            textAlign: 'left',
+            loader: true,
+            loaderBg: '#9EC600',
+            bgColor: bgColor,
+        });
     }
 
     map.on('pm:create', e => clickHandler(e));
