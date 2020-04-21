@@ -57,7 +57,17 @@
 
         circleFigure = e.layer;
         circleFigure.on('pm:dragend', ev => editHandler(ev));
+
         $.get("https://beta.ontomap.ontomap.eu/features?lat=" + e.layer.getLatLng().lat + "&lng=" + e.layer.getLatLng().lng + "&maxDistance=" + e.layer.getRadius(), function (geoJsonFeature) {
+            let mappaColori = new Map();
+            geoJsonFeature.features.forEach((item, i) => {
+                $.get("https://beta.ontomap.ontomap.eu/concepts/" + item.properties.otmClass + "/info",
+                    function (value) {
+                        mappaColori.set(item.properties.label, value);
+                    }
+                );
+            });
+
             geoJsonFeature.features.forEach((item, i) => {
                 let circle = turf.circle([e.layer.getLatLng().lng, e.layer.getLatLng().lat], e.layer.getRadius() / 1000);
                 let intersect = turf.intersect(circle, item);
@@ -66,21 +76,27 @@
                         let link = $('<div id="test"><b>' + item.properties.label + '</b></div>').append($('<img src="http://fusione22.altervista.org/images/iconfinder_star_285661.svg" alt="Salva posizione">').click(function () {
                             if (layer.myTag !== "favorite") {
                                 layer.myTag = "favorite";
-                                layer.setIcon(new L.Icon({
-                                    iconUrl: 'http://fusione22.altervista.org/images/iconfinder_map-marker_299087.svg',
-                                    iconSize: [38, 38],
-                                    iconAnchor: [12, 40],
-                                    popupAnchor: [1, -38],
-                                }));
+                                if (layer.options.color !== undefined)
+                                    layer.setStyle({color: mappaColori.get(item.properties.label).color})
+                                else
+                                    layer.setIcon(new L.Icon({
+                                        iconUrl: 'http://fusione22.altervista.org/images/marker.svg',
+                                        iconSize: [35, 35],
+                                        iconAnchor: [12, 40],
+                                        popupAnchor: [1, -38],
+                                    }));
                                 attivaToast("Posizione salvata", "info", "#2980b9");
                             } else {
                                 layer.myTag = "circleLayer";
-                                layer.setIcon(new L.Icon({
-                                    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.6.0/images/marker-icon.png',
-                                    iconSize: [25, 41],
-                                    iconAnchor: [12, 40],
-                                    popupAnchor: [1, -38],
-                                }));
+                                if (layer.options.color !== undefined)
+                                    layer.setStyle({color: "#3388ff"})
+                                else
+                                    layer.setIcon(new L.Icon({
+                                        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.6.0/images/marker-icon.png',
+                                        iconSize: [25, 41],
+                                        iconAnchor: [12, 40],
+                                        popupAnchor: [1, -38],
+                                    }));
                                 attivaToast("Posizione cancellata", "info", "#e74c3c");
                             }
                         }))[0];
@@ -145,6 +161,15 @@
 
         circleFigure = e.target;
         $.get("https://beta.ontomap.ontomap.eu/features?lat=" + e.target.getLatLng().lat + "&lng=" + e.target.getLatLng().lng + "&maxDistance=" + e.target.getRadius(), function (geoJsonFeature) {
+            let mappaColori = new Map();
+            geoJsonFeature.features.forEach((item, i) => {
+                $.get("https://beta.ontomap.ontomap.eu/concepts/" + item.properties.otmClass + "/info",
+                    function (value) {
+                        mappaColori.set(item.properties.label, value);
+                    }
+                );
+            });
+
             geoJsonFeature.features.forEach((item, i) => {
                 let circle = turf.circle([e.target.getLatLng().lng, e.target.getLatLng().lat], e.target.getRadius() / 1000);
                 let intersect = turf.intersect(circle, item);
@@ -153,21 +178,27 @@
                         let link = $('<div id="test"><b>' + item.properties.label + '</b></div>').append($('<img src="http://fusione22.altervista.org/images/iconfinder_star_285661.svg" alt="Salva posizione">').click(function () {
                             if (layer.myTag !== "favorite") {
                                 layer.myTag = "favorite";
-                                layer.setIcon(new L.Icon({
-                                    iconUrl: 'http://fusione22.altervista.org/images/iconfinder_map-marker_299087.svg',
-                                    iconSize: [38, 38],
-                                    iconAnchor: [12, 40],
-                                    popupAnchor: [1, -38],
-                                }));
+                                if (layer.options.color !== undefined)
+                                    layer.setStyle({color: mappaColori.get(item.properties.label).color})
+                                else
+                                    layer.setIcon(new L.Icon({
+                                        iconUrl: 'http://fusione22.altervista.org/images/marker.svg',
+                                        iconSize: [35, 35],
+                                        iconAnchor: [12, 40],
+                                        popupAnchor: [1, -38],
+                                    }));
                                 attivaToast("Posizione salvata", "info", "#2980b9");
                             } else {
                                 layer.myTag = "circleLayer";
-                                layer.setIcon(new L.Icon({
-                                    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.6.0/images/marker-icon.png',
-                                    iconSize: [25, 41],
-                                    iconAnchor: [12, 40],
-                                    popupAnchor: [1, -38],
-                                }));
+                                if (layer.options.color !== undefined)
+                                    layer.setStyle({color: "#3388ff"})
+                                else
+                                    layer.setIcon(new L.Icon({
+                                        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.6.0/images/marker-icon.png',
+                                        iconSize: [25, 41],
+                                        iconAnchor: [12, 40],
+                                        popupAnchor: [1, -38],
+                                    }));
                                 attivaToast("Posizione cancellata", "info", "#e74c3c");
                             }
                         }))[0];
