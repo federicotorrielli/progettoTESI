@@ -33,6 +33,7 @@
     let buttonPressed = false;
     let circleLayer = undefined;
     let circleFigure = undefined;
+    let specialMarkerList = new Map();
 
     let map = L.map('map', {
         center: [45.0709823, 7.6777233],
@@ -77,9 +78,19 @@
                             if (layer.myTag !== "favorite") {
                                 layer.myTag = "favorite";
                                 if (layer.options.color !== undefined) {
-                                    layer.setStyle({color: mappaColori.get(item.properties.label).color, fillOpacity: 0.9});
-                                }
-                                else
+                                    specialMarkerList.set(item.properties.label,new L.marker(layer.getLatLngs()[0][0], {
+                                        icon: new L.Icon({
+                                            iconUrl: 'http://fusione22.altervista.org/images/marker-icon-starred.png',
+                                            iconSize: [25, 41],
+                                            iconAnchor: [12, 40],
+                                            popupAnchor: [1, -38],
+                                        }), title: item.properties.label
+                                    }).addTo(map));
+                                    layer.setStyle({
+                                        color: mappaColori.get(item.properties.label).color,
+                                        fillOpacity: 0.9
+                                    });
+                                } else
                                     layer.setIcon(new L.Icon({
                                         iconUrl: 'http://fusione22.altervista.org/images/marker-icon-starred.png',
                                         iconSize: [25, 41],
@@ -89,9 +100,11 @@
                                 attivaToast("Posizione salvata", "info", "#2980b9");
                             } else {
                                 layer.myTag = "circleLayer";
-                                if (layer.options.color !== undefined)
-                                    layer.setStyle({color: "#3388ff", fillOpacity: 0.2})
-                                else
+                                if (layer.options.color !== undefined) {
+                                    layer.setStyle({color: "#3388ff", fillOpacity: 0.2});
+                                    map.removeLayer(specialMarkerList.get(item.properties.label));
+                                    specialMarkerList.delete(item.properties.label);
+                                } else
                                     layer.setIcon(new L.Icon({
                                         iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.6.0/images/marker-icon.png',
                                     }));
@@ -177,9 +190,19 @@
                             if (layer.myTag !== "favorite") {
                                 layer.myTag = "favorite";
                                 if (layer.options.color !== undefined) {
-                                    layer.setStyle({color: mappaColori.get(item.properties.label).color, fillOpacity: 0.9});
-                                }
-                                else
+                                    specialMarkerList.set(item.properties.label,new L.marker(layer.getLatLngs()[0][0], {
+                                        icon: new L.Icon({
+                                            iconUrl: 'http://fusione22.altervista.org/images/marker-icon-starred.png',
+                                            iconSize: [25, 41],
+                                            iconAnchor: [12, 40],
+                                            popupAnchor: [1, -38],
+                                        }), title: item.properties.label
+                                    }).addTo(map));
+                                    layer.setStyle({
+                                        color: mappaColori.get(item.properties.label).color,
+                                        fillOpacity: 0.9
+                                    });
+                                } else
                                     layer.setIcon(new L.Icon({
                                         iconUrl: 'http://fusione22.altervista.org/images/marker-icon-starred.png',
                                         iconSize: [25, 41],
@@ -189,9 +212,11 @@
                                 attivaToast("Posizione salvata", "info", "#2980b9");
                             } else {
                                 layer.myTag = "circleLayer";
-                                if (layer.options.color !== undefined)
-                                    layer.setStyle({color: "#3388ff", fillOpacity: 0.2})
-                                else
+                                if (layer.options.color !== undefined) {
+                                    layer.setStyle({color: "#3388ff", fillOpacity: 0.2});
+                                    map.removeLayer(specialMarkerList.get(item.properties.label));
+                                    specialMarkerList.delete(item.properties.label);
+                                } else
                                     layer.setIcon(new L.Icon({
                                         iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.6.0/images/marker-icon.png',
                                     }));
