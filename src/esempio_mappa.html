@@ -76,8 +76,9 @@
                         let link = $('<div id="test"><b>' + item.properties.label + '</b></div>').append($('<img src="http://fusione22.altervista.org/images/iconfinder_star_285661.svg" alt="Salva posizione">').click(function () {
                             if (layer.myTag !== "favorite") {
                                 layer.myTag = "favorite";
-                                if (layer.options.color !== undefined)
-                                    layer.setStyle({color: mappaColori.get(item.properties.label).color})
+                                if (layer.options.color !== undefined) {
+                                    layer.setStyle({color: mappaColori.get(item.properties.label).color, fillOpacity: 0.9});
+                                }
                                 else
                                     layer.setIcon(new L.Icon({
                                         iconUrl: 'http://fusione22.altervista.org/images/marker-icon-starred.png',
@@ -89,7 +90,7 @@
                             } else {
                                 layer.myTag = "circleLayer";
                                 if (layer.options.color !== undefined)
-                                    layer.setStyle({color: "#3388ff"})
+                                    layer.setStyle({color: "#3388ff", fillOpacity: 0.2})
                                 else
                                     layer.setIcon(new L.Icon({
                                         iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.6.0/images/marker-icon.png',
@@ -175,8 +176,9 @@
                         let link = $('<div id="test"><b>' + item.properties.label + '</b></div>').append($('<img src="http://fusione22.altervista.org/images/iconfinder_star_285661.svg" alt="Salva posizione">').click(function () {
                             if (layer.myTag !== "favorite") {
                                 layer.myTag = "favorite";
-                                if (layer.options.color !== undefined)
-                                    layer.setStyle({color: mappaColori.get(item.properties.label).color})
+                                if (layer.options.color !== undefined) {
+                                    layer.setStyle({color: mappaColori.get(item.properties.label).color, fillOpacity: 0.9});
+                                }
                                 else
                                     layer.setIcon(new L.Icon({
                                         iconUrl: 'http://fusione22.altervista.org/images/marker-icon-starred.png',
@@ -188,7 +190,7 @@
                             } else {
                                 layer.myTag = "circleLayer";
                                 if (layer.options.color !== undefined)
-                                    layer.setStyle({color: "#3388ff"})
+                                    layer.setStyle({color: "#3388ff", fillOpacity: 0.2})
                                 else
                                     layer.setIcon(new L.Icon({
                                         iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.6.0/images/marker-icon.png',
