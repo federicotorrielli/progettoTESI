@@ -25,7 +25,7 @@
 <body>
 <div id="map"></div>
 <div class="leaflet-top leaflet-right" style="pointer-events: auto">
-    <button class="mui-btn mui-btn--primary leaflet-clickable" id="bottone1" onclick="buttonPressedMap();">Attiva
+    <button class="mui-btn mui-btn--primary leaflet-clickable" id="bottone1" onclick="buttonPressedMap();" style="right: 15px">Attiva
         Funzione
     </button>
 </div>
@@ -85,7 +85,7 @@
                                             iconAnchor: [12, 40],
                                             popupAnchor: [1, -38],
                                         }), title: item.properties.label
-                                    }).addTo(map));
+                                    }).addTo(map).bindPopup(L.responsivePopup({maxHeight: 200}, layer).setContent(link)));
                                     layer.setStyle({
                                         color: mappaColori.get(item.properties.label).color,
                                         fillOpacity: 0.9
@@ -197,7 +197,7 @@
                                             iconAnchor: [12, 40],
                                             popupAnchor: [1, -38],
                                         }), title: item.properties.label
-                                    }).addTo(map));
+                                    }).addTo(map).bindPopup(L.responsivePopup({maxHeight: 200}, layer).setContent(link)));
                                     layer.setStyle({
                                         color: mappaColori.get(item.properties.label).color,
                                         fillOpacity: 0.9
