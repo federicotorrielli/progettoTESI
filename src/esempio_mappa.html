@@ -25,7 +25,8 @@
 <body>
 <div id="map"></div>
 <div class="leaflet-top leaflet-right" style="pointer-events: auto">
-    <button class="mui-btn mui-btn--primary leaflet-clickable" id="bottone1" onclick="buttonPressedMap();" style="right: 15px">Attiva
+    <button class="mui-btn mui-btn--primary leaflet-clickable" id="bottone1" onclick="buttonPressedMap();"
+            style="right: 15px">Attiva
         Funzione
     </button>
 </div>
@@ -58,8 +59,11 @@
 
         circleFigure = e.layer;
         circleFigure.on('pm:dragend', ev => editHandler(ev));
+        jqueryRequest(e.layer);
+    }
 
-        $.get("https://beta.ontomap.ontomap.eu/features?lat=" + e.layer.getLatLng().lat + "&lng=" + e.layer.getLatLng().lng + "&maxDistance=" + e.layer.getRadius(), function (geoJsonFeature) {
+    function jqueryRequest(e) {
+        $.get("https://beta.ontomap.ontomap.eu/features?lat=" + e.getLatLng().lat + "&lng=" + e.getLatLng().lng + "&maxDistance=" + e.getRadius(), function (geoJsonFeature) {
             let mappaColori = new Map();
             geoJsonFeature.features.forEach((item, i) => {
                 $.get("https://beta.ontomap.ontomap.eu/concepts/" + item.properties.otmClass + "/info",
@@ -70,7 +74,7 @@
             });
 
             geoJsonFeature.features.forEach((item, i) => {
-                let circle = turf.circle([e.layer.getLatLng().lng, e.layer.getLatLng().lat], e.layer.getRadius() / 1000);
+                let circle = turf.circle([e.getLatLng().lng, e.getLatLng().lat], e.getRadius() / 1000);
                 let intersect = turf.intersect(circle, item);
                 circleLayer = L.geoJSON(intersect, {
                     onEachFeature(feature, layer) {
@@ -171,66 +175,7 @@
             removalHandler(circleFigure, false);
 
         circleFigure = e.target;
-        $.get("https://beta.ontomap.ontomap.eu/features?lat=" + e.target.getLatLng().lat + "&lng=" + e.target.getLatLng().lng + "&maxDistance=" + e.target.getRadius(), function (geoJsonFeature) {
-            let mappaColori = new Map();
-            geoJsonFeature.features.forEach((item, i) => {
-                $.get("https://beta.ontomap.ontomap.eu/concepts/" + item.properties.otmClass + "/info",
-                    function (value) {
-                        mappaColori.set(item.properties.label, value);
-                    }
-                );
-            });
-
-            geoJsonFeature.features.forEach((item, i) => {
-                let circle = turf.circle([e.target.getLatLng().lng, e.target.getLatLng().lat], e.target.getRadius() / 1000);
-                let intersect = turf.intersect(circle, item);
-                circleLayer = L.geoJSON(intersect, {
-                    onEachFeature(feature, layer) {
-                        let link = $('<div id="test"><b>' + item.properties.label + '</b></div>').append($('<img src="http://fusione22.altervista.org/images/iconfinder_star_285661.svg" alt="Salva posizione">').click(function () {
-                            if (layer.myTag !== "favorite") {
-                                layer.myTag = "favorite";
-                                if (layer.options.color !== undefined) {
-                                    specialMarkerList.set(layer.getLatLngs()[0][0], new L.marker(layer.getLatLngs()[0][0], {
-                                        icon: new L.Icon({
-                                            iconUrl: 'http://fusione22.altervista.org/images/marker-icon-starred.png',
-                                            iconSize: [25, 41],
-                                            iconAnchor: [12, 40],
-                                            popupAnchor: [1, -38],
-                                        }), title: item.properties.label
-                                    }).addTo(map).bindPopup(L.responsivePopup({maxHeight: 200}, layer).setContent(link)));
-                                    layer.setStyle({
-                                        color: mappaColori.get(item.properties.label).color,
-                                        fillOpacity: 0.9
-                                    });
-                                } else
-                                    layer.setIcon(new L.Icon({
-                                        iconUrl: 'http://fusione22.altervista.org/images/marker-icon-starred.png',
-                                        iconSize: [25, 41],
-                                        iconAnchor: [12, 40],
-                                        popupAnchor: [1, -38],
-                                    }));
-                                attivaToast("Posizione salvata", "info", "#2980b9");
-                            } else {
-                                layer.myTag = "circleLayer";
-                                if (layer.options.color !== undefined) {
-                                    layer.setStyle({color: "#3388ff", fillOpacity: 0.2});
-                                    map.removeLayer(specialMarkerList.get(layer.getLatLngs()[0][0]));
-                                    specialMarkerList.delete(layer.getLatLngs()[0][0]);
-                                } else
-                                    layer.setIcon(new L.Icon({
-                                        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.6.0/images/marker-icon.png',
-                                    }));
-                                attivaToast("Posizione cancellata", "info", "#e74c3c");
-                            }
-                        }))[0];
-                        if (layer.myTag === undefined)
-                            layer.myTag = "circleLayer";
-                        layer.bindPopup(L.responsivePopup({maxHeight: 200}, layer).setContent(link));
-                    }
-                });
-                circleLayer.addTo(map);
-            });
-        });
+        jqueryRequest(e.target);
     }
 
     function attivaToast(dati, cond, bgColor) {
