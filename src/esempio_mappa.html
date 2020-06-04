@@ -78,13 +78,13 @@
                 let intersect = turf.intersect(circle, item);
                 circleLayer = L.geoJSON(intersect, {
                     onEachFeature(feature, layer) {
-                        let link = $('<div id="test"><b>' + item.properties.label + '</b></div>').append($('<img src="http://fusione22.altervista.org/images/iconfinder_star_285661.svg" alt="Salva posizione">').click(function () {
+                        let link = $('<div id="test"><b>' + item.properties.label + '</b></div>').append($('<img src="https://evilscript.altervista.org/images/iconfinder_star_285661.svg" alt="Salva posizione">').click(function () {
                             if (layer.myTag !== "favorite") {
                                 layer.myTag = "favorite";
                                 if (layer.options.color !== undefined) {
                                     specialMarkerList.set(layer.getLatLngs()[0][0], new L.marker(layer.getLatLngs()[0][0], {
                                         icon: new L.Icon({
-                                            iconUrl: 'http://fusione22.altervista.org/images/marker-icon-starred.png',
+                                            iconUrl: 'https://evilscript.altervista.org/images/marker-icon-starred.png',
                                             iconSize: [25, 41],
                                             iconAnchor: [12, 40],
                                             popupAnchor: [1, -38],
@@ -96,7 +96,7 @@
                                     });
                                 } else
                                     layer.setIcon(new L.Icon({
-                                        iconUrl: 'http://fusione22.altervista.org/images/marker-icon-starred.png',
+                                        iconUrl: 'https://evilscript.altervista.org/images/marker-icon-starred.png',
                                         iconSize: [25, 41],
                                         iconAnchor: [12, 40],
                                         popupAnchor: [1, -38],
