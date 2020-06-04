@@ -1,4 +1,4 @@
-# progetto-tesi
+# Progetto Tesi - Federico Torrielli
 
 Questa tesi è il risultato finale di un lavoro di ricerca e sviluppo svoltosi durante il periodo di stage curricolare. La tesi nasce con l’obiettivo di ampliare il sistema cartografico “OnToMap - Mappe di Comunità 3.0” di una funzionalità di ricerca di specifiche ontologie in base ad un punto selezionato, specificando l’ampiezza di indagine attraverso una lente di ingrandimento personalizzabile per visualizzare unicamente i sottoinsiemi di elementi filtrati graficamente dall’utente. Per rendere efficace la ricerca, è stato integrato un semplice sistema di salvataggio dei marker sulla mappa con particolare attenzione a mantenere la consistenza grafica con il sistema preesistente.
 
