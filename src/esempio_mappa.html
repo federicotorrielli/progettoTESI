@@ -14,6 +14,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-toast-plugin/1.3.2/jquery.toast.min.css"
           rel="stylesheet"/>
     <link href="https://unpkg.com/leaflet-responsive-popup@0.6.4/leaflet.responsive.popup.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <style media="screen">
         #map {
             width: 100%;
@@ -25,6 +26,25 @@
 <body>
 <div id="map"></div>
 <script type="text/javascript">
+    let vue = new Vue({
+        el: '#map',
+        data: {
+            saved_markers: [],
+        },
+        methods: {
+            addMarker(marker) {
+                this.saved_markers.push(marker);
+            },
+            removeMarker(marker) {
+                let i = this.saved_markers.map(item => item.id).indexOf(marker);
+                this.saved_markers.splice(i,1);
+            },
+            printMarkers() {
+                console.log(this.saved_markers);
+            }
+        }
+    });
+
     let circleLayer = undefined;
     let circleFigure = undefined;
     let specialMarkerList = new Map();
@@ -95,7 +115,13 @@
                         })
                         let link = $('<div style="overflow: hidden"><b>' + item.properties.label + '</b></div>').append($('<br><div style="text-align: center; float: left"><img id="saved" src="http://evilscript.altervista.org/images/star.png" alt="Salva posizione"></div>').click(function () {
                             if (layer.myTag !== "favorite") {
-                                $("#saved").attr('src',"http://evilscript.altervista.org/images/iconfinder_star_285661.svg");
+
+
+                                vue.addMarker(layer);
+                                vue.printMarkers();
+
+
+                                $("#saved").attr('src', "http://evilscript.altervista.org/images/iconfinder_star_285661.svg");
                                 layer.myTag = "favorite";
                                 if (layer.options.color !== undefined) {
                                     specialMarkerList.set(layer.getLatLngs()[0][0], new L.marker(layer.getLatLngs()[0][0], {
@@ -115,7 +141,11 @@
                                     }));
                                 attivaToast("Posizione salvata", "info", "#2980b9");
                             } else {
-                                $("#saved").attr('src',"http://evilscript.altervista.org/images/star.png");
+
+                                vue.removeMarker(layer);
+                                vue.printMarkers();
+
+                                $("#saved").attr('src', "http://evilscript.altervista.org/images/star.png");
                                 layer.myTag = "circleLayer";
                                 if (layer.options.color !== undefined) {
                                     map.removeLayer(specialMarkerList.get(layer.getLatLngs()[0][0]));
