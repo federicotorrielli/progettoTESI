@@ -113,7 +113,7 @@
                                 fillOpacity: 0.9
                             });
                         })
-                        let link = $('<div style="overflow: hidden"><b>' + item.properties.label + '</b></div>').append($('<br><div style="text-align: center; float: left"><img id="saved" src="http://evilscript.altervista.org/images/star.png" alt="Salva posizione"></div>').click(function () {
+                        let link = $('<div style="overflow: hidden"><b>' + item.properties.label + '</b></div>').append($('<br><div style="text-align: center; float: left"><img id="saved" src="https://evilscript.altervista.org/images/star.png" alt="Salva posizione"></div>').click(function () {
                             if (layer.myTag !== "favorite") {
 
 
@@ -121,7 +121,7 @@
                                 vue.printMarkers();
 
 
-                                $("#saved").attr('src', "http://evilscript.altervista.org/images/iconfinder_star_285661.svg");
+                                $("#saved").attr('src', "https://evilscript.altervista.org/images/iconfinder_star_285661.svg");
                                 layer.myTag = "favorite";
                                 if (layer.options.color !== undefined) {
                                     specialMarkerList.set(layer.getLatLngs()[0][0], new L.marker(layer.getLatLngs()[0][0], {
@@ -145,7 +145,7 @@
                                 vue.removeMarker(layer);
                                 vue.printMarkers();
 
-                                $("#saved").attr('src', "http://evilscript.altervista.org/images/star.png");
+                                $("#saved").attr('src', "https://evilscript.altervista.org/images/star.png");
                                 layer.myTag = "circleLayer";
                                 if (layer.options.color !== undefined) {
                                     map.removeLayer(specialMarkerList.get(layer.getLatLngs()[0][0]));
@@ -156,7 +156,7 @@
                                     }));
                                 attivaToast("Posizione cancellata", "info", "#e74c3c");
                             }
-                        })).append('<div style="float: right"><img src="http://evilscript.altervista.org/images/iconfinder_sign-info_299086.svg"/></div>')[0];
+                        })).append('<div style="float: right"><img src="https://evilscript.altervista.org/images/iconfinder_sign-info_299086.svg"/></div>')[0];
                         if (layer.myTag === undefined)
                             layer.myTag = "circleLayer";
                         layer.bindPopup(L.responsivePopup({maxHeight: 200}, layer).setContent(link));
