@@ -37,7 +37,7 @@
             },
             removeMarker(marker) {
                 let i = this.saved_markers.map(item => item.id).indexOf(marker);
-                this.saved_markers.splice(i,1);
+                this.saved_markers.splice(i, 1);
             },
             printMarkers() {
                 console.log(this.saved_markers);
@@ -76,7 +76,7 @@
     map.pm.setLang('it');
 
     function clickHandler(e) {
-        if (e.layer.getRadius() > 400) {
+        if (e.layer.getRadius() > 450) {
             attivaToast("Il cerchio è troppo grande, riprova!", "error", "#e74c3c");
             map.removeLayer(e.layer)
             return;
@@ -91,6 +91,7 @@
     }
 
     let mappaColori = new Map();
+    let mappaMarker = new Map();
     let colorRequest;
 
     function jqueryRequest(e) {
@@ -99,6 +100,8 @@
                 colorRequest = $.get("https://beta.ontomap.ontomap.eu/concepts/" + item.properties.otmClass + "/info",
                     function (value) {
                         mappaColori.set(item.properties.label, value);
+                        if (value.hasOwnProperty('icon'))
+                            mappaMarker.set(item.properties.label, value)
                     }
                 );
             });
@@ -107,11 +110,23 @@
                 let intersect = turf.intersect(circle, item);
                 circleLayer = L.geoJSON(intersect, {
                     onEachFeature(feature, layer) {
+                        let icon;
                         $.when(colorRequest).done(function (v1) {
-                            layer.setStyle({
-                                color: mappaColori.get(item.properties.label).color,
-                                fillOpacity: 0.9
-                            });
+                            if (mappaMarker.get(item.properties.label) != null)
+                                icon = new L.icon({
+                                    iconUrl: "https://beta.ontomap.ontomap.eu" + mappaMarker.get(item.properties.label).icon,
+                                    iconRetinaUrl: "https://beta.ontomap.ontomap.eu" + mappaMarker.get(item.properties.label).iconRetina,
+                                    iconSize: [25, 41],
+                                    iconAnchor: [12, 40],
+                                    popupAnchor: [1, -38]
+                                });
+                            if (icon === undefined)
+                                layer.setStyle({
+                                    color: mappaColori.get(item.properties.label).color,
+                                    fillOpacity: 0.9
+                                });
+                            else
+                                layer.setIcon(icon);
                         })
                         let link = $('<div style="overflow: hidden"><b>' + item.properties.label + '</b></div>').append($('<br><div style="text-align: center; float: left"><img id="saved" src="https://evilscript.altervista.org/images/star.png" alt="Salva posizione"></div>').click(function () {
                             if (layer.myTag !== "favorite") {
@@ -151,9 +166,7 @@
                                     map.removeLayer(specialMarkerList.get(layer.getLatLngs()[0][0]));
                                     specialMarkerList.delete(layer.getLatLngs()[0][0]);
                                 } else
-                                    layer.setIcon(new L.Icon({
-                                        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.6.0/images/marker-icon.png',
-                                    }));
+                                    layer.setIcon(icon);
                                 attivaToast("Posizione cancellata", "info", "#e74c3c");
                             }
                         })).append('<div style="float: right"><img src="https://evilscript.altervista.org/images/iconfinder_sign-info_299086.svg"/></div>')[0];
@@ -203,6 +216,17 @@
 
     map.on('pm:create', e => clickHandler(e));
     map.on('pm:remove', e => removalHandler(e));
+    map.pm.Draw.Circle._syncCircleRadius = function _syncCircleRadius() {
+        // Vogliamo che il cerchio sia limitato a qualche centinaia di metri
+        let A = this._centerMarker.getLatLng();
+
+        let B = this._hintMarker.getLatLng();
+
+        let distance = A.distanceTo(B);
+        if (distance < 450) {
+            this._layer.setRadius(distance);
+        }
+    }
 </script>
 </body>
 </html>
