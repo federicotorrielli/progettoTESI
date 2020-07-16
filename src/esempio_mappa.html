@@ -175,6 +175,10 @@
                         if (layer.myTag === undefined)
                             layer.myTag = "circleLayer";
                         layer.bindPopup(L.responsivePopup({maxHeight: 200}, layer).setContent(link));
+
+                        // Questi due attributi disattivano il trascinamento dei marker sulla mappa
+                        layer._pmTempLayer = true;
+                        layer._dragDisabled = true;
                     }
                 });
                 circleLayer.addTo(map);
