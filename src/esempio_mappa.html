@@ -75,7 +75,20 @@
         removalMode: true,
         cutPolygon: false,
     });
-    map.pm.setLang('it');
+
+    const customTranslation = {
+        buttonTitles: {
+            drawCircleButton: 'Clicca per attivare la lente di esplorazione, poi seleziona il punto della mappa su cui posizionarla'
+        },
+        actions: {
+            cancel: 'Disattiva la lente'
+        },
+        tooltips: {
+            startCircle: 'Clicca per posizionare il centro della lente nella mappa',
+            finishCircle: 'Clicca per definire il raggio della lente'
+        }
+    };
+    map.pm.setLang('lensChange', customTranslation, 'it');
 
     function clickHandler(e) {
         if (e.layer.getRadius() > 450) {
