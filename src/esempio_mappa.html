@@ -17,6 +17,18 @@
           rel="stylesheet"/>
     <link href="https://unpkg.com/leaflet-responsive-popup@0.6.4/leaflet.responsive.popup.css" rel="stylesheet"/>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <link href="css/easy-button.css" rel="stylesheet">
+    <script src="js/easy-button.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/js/all.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" rel="stylesheet">
+    <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+          integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" rel="stylesheet">
+    <script crossorigin="anonymous"
+            integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+            src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script crossorigin="anonymous"
+            integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+            src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
     <style media="screen">
         #map {
             width: 100%;
@@ -26,6 +38,27 @@
     <title>Mappa di Torino</title>
 </head>
 <body>
+
+<div aria-hidden="true" aria-labelledby="filtraOggettiLabel" class="modal fade" id="filtraOggetti" role="dialog"
+     tabindex="-1">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filtraOggettiLabel">Filtra gli oggetti nella lente</h5>
+                <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" data-dismiss="modal" type="button">Salva e chiudi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="map"></div>
 <script type="text/javascript">
     let vue = new Vue({
@@ -196,11 +229,13 @@
                 });
                 circleLayer.addTo(map);
                 map.pm.enableGlobalDragMode();
+                filterButton.addTo(map);
             });
         });
     }
 
     function removalHandler(circle, bool) {
+        filterButton.removeFrom(map); //in alternativa basta usare .disable()
         map.eachLayer(function (layer) {
             if (layer.myTag && layer.myTag === "circleLayer")
                 map.removeLayer(layer);
@@ -233,6 +268,18 @@
             bgColor: bgColor,
         });
     }
+
+    let filterButton = L.easyButton({
+        states: [{
+            stateName: 'startState',
+            icon: 'fa-filter',
+            title: 'Filtra i risultati nel cerchio',
+            onClick: function (btn, map) {
+                $('#filtraOggetti').modal('show');
+                //btn.state('stato-finale');
+            }
+        }]
+    });
 
     map.on('pm:create', e => clickHandler(e));
     map.on('pm:remove', e => removalHandler(e));
