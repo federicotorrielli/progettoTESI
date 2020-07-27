@@ -193,7 +193,7 @@
             }, this);
 
             // prep the contents of the control
-            if (this.options.type == 'replace') {
+            if (this.options.type === 'replace') {
                 this.button.appendChild(this._currentState.icon);
             } else {
                 for (var i = 0; i < this._states.length; i++) {
@@ -239,7 +239,7 @@
 
         _activateStateNamed: function (stateName) {
             for (var i = 0; i < this._states.length; i++) {
-                if (this._states[i].stateName == stateName) {
+                if (this._states[i].stateName === stateName) {
                     this._activateState(this._states[i]);
                 }
             }
@@ -255,7 +255,7 @@
             } else {
 
                 // swap out elements... if you're into that kind of thing
-                if (this.options.type == 'replace') {
+                if (this.options.type === 'replace') {
                     this.button.appendChild(newState.icon);
                     this.button.removeChild(this._currentState.icon);
                 }

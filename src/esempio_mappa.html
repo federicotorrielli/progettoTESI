@@ -1,28 +1,28 @@
 <html lang="it-IT">
 <head>
     <meta charset="UTF-8">
+    <link href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" rel="stylesheet"/>
+    <link href="//cdn.muicss.com/mui-0.10.1/css/mui.min.css" rel="stylesheet"/>
+    <link href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-toast-plugin/1.3.2/jquery.toast.min.css"
+          rel="stylesheet"/>
+    <link href="https://unpkg.com/leaflet-responsive-popup@0.6.4/leaflet.responsive.popup.css" rel="stylesheet"/>
+    <link href="css/easy-button.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" rel="stylesheet">
+    <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+          integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" rel="stylesheet">
     <script crossorigin="anonymous"
             integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
             src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <link href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" rel="stylesheet"/>
-    <link href="//cdn.muicss.com/mui-0.10.1/css/mui.min.css" rel="stylesheet"/>
     <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
-    <link href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" rel="stylesheet"/>
     <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"
             type="text/javascript"></script>
     <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
     <script src="https://unpkg.com/leaflet-responsive-popup@0.6.4/leaflet.responsive.popup.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-toast-plugin/1.3.2/jquery.toast.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-toast-plugin/1.3.2/jquery.toast.min.css"
-          rel="stylesheet"/>
-    <link href="https://unpkg.com/leaflet-responsive-popup@0.6.4/leaflet.responsive.popup.css" rel="stylesheet"/>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <link href="css/easy-button.css" rel="stylesheet">
     <script src="js/easy-button.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/js/all.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" rel="stylesheet">
-    <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
-          integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" rel="stylesheet">
     <script crossorigin="anonymous"
             integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
             src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
@@ -49,7 +49,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="white-space: pre-line">
                 ...
             </div>
             <div class="modal-footer">
@@ -60,240 +60,6 @@
 </div>
 
 <div id="map"></div>
-<script type="text/javascript">
-    let vue = new Vue({
-        el: '#map',
-        data: {
-            saved_markers: [],
-        },
-        methods: {
-            addMarker(marker) {
-                this.saved_markers.push(marker);
-            },
-            removeMarker(marker) {
-                let i = this.saved_markers.map(item => item.id).indexOf(marker);
-                this.saved_markers.splice(i, 1);
-            },
-            printMarkers() {
-                console.log(this.saved_markers);
-            }
-        }
-    });
-
-    let circleLayer = undefined;
-    let circleFigure = undefined;
-    let specialMarkerList = new Map();
-
-    let map = L.map('map', {
-        center: [45.0709823, 7.6777233],
-        minZoom: 2,
-        zoom: 15
-    });
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        subdomains: ['a', 'b', 'c']
-    }).addTo(map);
-
-    map.pm.addControls({
-        position: 'topright',
-        drawMarker: false,
-        drawPolyline: false,
-        drawRectangle: false,
-        drawPolygon: false,
-        drawCircleMarker: false,
-        drawCircle: true,
-        editMode: false,
-        dragMode: true,
-        removalMode: true,
-        cutPolygon: false,
-    });
-
-    const customTranslation = {
-        buttonTitles: {
-            drawCircleButton: 'Clicca per attivare la lente di esplorazione, poi seleziona il punto della mappa su cui posizionarla'
-        },
-        actions: {
-            cancel: 'Disattiva la lente'
-        },
-        tooltips: {
-            startCircle: 'Clicca per posizionare il centro della lente nella mappa',
-            finishCircle: 'Clicca per definire il raggio della lente'
-        }
-    };
-    map.pm.setLang('lensChange', customTranslation, 'it');
-
-    function clickHandler(e) {
-        if (e.layer.getRadius() > 450) {
-            attivaToast("Il cerchio è troppo grande, riprova!", "error", "#e74c3c");
-            map.removeLayer(e.layer)
-            return;
-        }
-
-        if (circleLayer !== undefined && circleFigure !== undefined)
-            removalHandler(circleFigure, true);
-
-        circleFigure = e.layer;
-        circleFigure.on('pm:dragend', ev => editHandler(ev));
-        jqueryRequest(e.layer);
-    }
-
-    let mappaColori = new Map();
-    let mappaMarker = new Map();
-    let colorRequest;
-
-    function jqueryRequest(e) {
-        $.get("https://beta.ontomap.ontomap.eu/features?lat=" + e.getLatLng().lat + "&lng=" + e.getLatLng().lng + "&maxDistance=" + e.getRadius(), function (geoJsonFeature) {
-            geoJsonFeature.features.forEach((item, i) => {
-                colorRequest = $.get("https://beta.ontomap.ontomap.eu/concepts/" + item.properties.otmClass + "/info",
-                    function (value) {
-                        mappaColori.set(item.properties.label, value);
-                        if (value.hasOwnProperty('icon'))
-                            mappaMarker.set(item.properties.label, value)
-                    }
-                );
-            });
-            geoJsonFeature.features.forEach((item, i) => {
-                let circle = turf.circle([e.getLatLng().lng, e.getLatLng().lat], e.getRadius() / 1000);
-                let intersect = turf.intersect(circle, item);
-                circleLayer = L.geoJSON(intersect, {
-                    onEachFeature(feature, layer) {
-                        let icon;
-                        $.when(colorRequest).done(function (v1) {
-                            if (mappaMarker.get(item.properties.label) != null)
-                                icon = new L.icon({
-                                    iconUrl: "https://beta.ontomap.ontomap.eu" + mappaMarker.get(item.properties.label).icon,
-                                    iconRetinaUrl: "https://beta.ontomap.ontomap.eu" + mappaMarker.get(item.properties.label).iconRetina,
-                                    iconSize: [25, 41],
-                                    iconAnchor: [12, 40],
-                                    popupAnchor: [1, -38]
-                                });
-                            if (icon === undefined || layer.setIcon === undefined)
-                                layer.setStyle({
-                                    color: mappaColori.get(item.properties.label).color,
-                                    fillOpacity: 0.9,
-                                    editable: false
-                                });
-                            else layer.setIcon(icon);
-                        })
-                        let link = $('<div style="overflow: hidden"><b>' + item.properties.label + '</b></div>').append($('<br><div style="text-align: center; float: left"><img id="saved" src="https://evilscript.altervista.org/images/star.png" alt="Salva posizione"></div>').click(function () {
-                            if (layer.myTag !== "favorite") {
-
-
-                                vue.addMarker(layer);
-                                vue.printMarkers();
-
-
-                                $("#saved").attr('src', "https://evilscript.altervista.org/images/iconfinder_star_285661.svg");
-                                layer.myTag = "favorite";
-                                if (layer.options.color !== undefined) {
-                                    specialMarkerList.set(layer.getLatLngs()[0][0], new L.marker(layer.getLatLngs()[0][0], {
-                                        icon: new L.Icon({
-                                            iconUrl: 'https://evilscript.altervista.org/images/marker-icon-starred.png',
-                                            iconSize: [25, 41],
-                                            iconAnchor: [12, 40],
-                                            popupAnchor: [1, -38],
-                                        }), title: item.properties.label
-                                    }).addTo(map).bindPopup(L.responsivePopup({maxHeight: 200}, layer).setContent(link)));
-                                } else
-                                    layer.setIcon(new L.Icon({
-                                        iconUrl: 'https://evilscript.altervista.org/images/marker-icon-starred.png',
-                                        iconSize: [25, 41],
-                                        iconAnchor: [12, 40],
-                                        popupAnchor: [1, -38],
-                                    }));
-                                attivaToast("Posizione salvata", "info", "#2980b9");
-                            } else {
-
-                                vue.removeMarker(layer);
-                                vue.printMarkers();
-
-                                $("#saved").attr('src', "https://evilscript.altervista.org/images/star.png");
-                                layer.myTag = "circleLayer";
-                                if (layer.options.color !== undefined) {
-                                    map.removeLayer(specialMarkerList.get(layer.getLatLngs()[0][0]));
-                                    specialMarkerList.delete(layer.getLatLngs()[0][0]);
-                                } else
-                                    layer.setIcon(icon);
-                                attivaToast("Posizione cancellata", "info", "#e74c3c");
-                            }
-                        })).append('<div style="float: right"><img src="https://evilscript.altervista.org/images/iconfinder_sign-info_299086.svg"/></div>')[0];
-                        if (layer.myTag === undefined)
-                            layer.myTag = "circleLayer";
-                        layer.bindPopup(L.responsivePopup({maxHeight: 200}, layer).setContent(link));
-
-                        // Questi due attributi disattivano il trascinamento dei marker sulla mappa
-                        layer._pmTempLayer = true;
-                        layer._dragDisabled = true;
-                    }
-                });
-                circleLayer.addTo(map);
-                map.pm.enableGlobalDragMode();
-                filterButton.addTo(map);
-            });
-        });
-    }
-
-    function removalHandler(circle, bool) {
-        filterButton.removeFrom(map); //in alternativa basta usare .disable()
-        map.eachLayer(function (layer) {
-            if (layer.myTag && layer.myTag === "circleLayer")
-                map.removeLayer(layer);
-        });
-        if (bool)
-            map.removeLayer(circle);
-    }
-
-    function editHandler(e) {
-        if (circleLayer !== undefined && circleFigure !== undefined)
-            removalHandler(circleFigure, false);
-
-        circleFigure = e.target;
-        jqueryRequest(e.target);
-    }
-
-    function attivaToast(dati, cond, bgColor) {
-        $.toast({
-            text: dati,
-            heading: 'Avviso',
-            icon: cond,
-            showHideTransition: 'fade',
-            allowToastClose: true,
-            hideAfter: 3000,
-            stack: 5,
-            position: 'bottom-left',
-            textAlign: 'left',
-            loader: true,
-            loaderBg: '#9EC600',
-            bgColor: bgColor,
-        });
-    }
-
-    let filterButton = L.easyButton({
-        states: [{
-            stateName: 'startState',
-            icon: 'fa-filter',
-            title: 'Filtra i risultati nel cerchio',
-            onClick: function (btn, map) {
-                $('#filtraOggetti').modal('show');
-                //btn.state('stato-finale');
-            }
-        }]
-    });
-
-    map.on('pm:create', e => clickHandler(e));
-    map.on('pm:remove', e => removalHandler(e));
-    map.pm.Draw.Circle._syncCircleRadius = function _syncCircleRadius() {
-        // Vogliamo che il cerchio sia limitato a qualche centinaia di metri
-        let A = this._centerMarker.getLatLng();
-
-        let B = this._hintMarker.getLatLng();
-
-        let distance = A.distanceTo(B);
-        if (distance < 450) {
-            this._layer.setRadius(distance);
-        }
-    }
-</script>
+<script src="js/around-me.js"></script>
 </body>
 </html>
