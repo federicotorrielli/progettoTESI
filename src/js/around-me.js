@@ -45,6 +45,13 @@ const vue = new Vue({
         },
         select() {
             this.allSelected = false;
+            this.removeDuplicates();
+        },
+        removeDuplicates() {
+            for (let s in this.checkLabels) {
+                this.checkLabels[s] = this.checkLabels[s].replace(/_/g, " ");
+            }
+            this.checkLabels = [...new Set(this.checkLabels)];
         }
     }
 });
@@ -221,7 +228,7 @@ function jqueryRequest(e) {
 }
 
 function removalHandler(circle, bool) {
-    filterButton.removeFrom(map); //in alternativa basta usare .disable()
+    filterButton.removeFrom(map); // alternatively .disable()
     map.eachLayer(function (layer) {
         if (layer.myTag && layer.myTag === "circleLayer")
             map.removeLayer(layer);
@@ -256,14 +263,14 @@ function attivaToast(dati, cond, bgColor) {
 }
 
 function saveLabels() {
+    // TODO: il dismiss del modal deve far partire comunque questa funzione
     selectedLabelSet = vue.getList();
-    console.log(selectedLabelSet);
+    selectItemsToBeDisplayed();
 }
 
 function selectItemsToBeDisplayed() {
     savedLayers.forEach(function (l) {
         if (l.selected === true) {
-            console.log(l);
             map.addLayer(l);
             l.selected = false;
         }

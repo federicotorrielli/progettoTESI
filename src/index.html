@@ -58,9 +58,9 @@
                         </label>
                     </div>
 
-                    <div class="neumorphism-toggle" v-for="(check,key) in checked_labels">
-                        <input type="checkbox" :id="key" v-model="checkLabels" :value="check" @click="select">
-                        <label :for="key">
+                    <div class="neumorphism-toggle" v-for="(check,index) in checked_labels">
+                        <input type="checkbox" :id="index" v-model="checkLabels" :value="check" @click="select">
+                        <label :for="index">
                             <div class="switch">
                                 <div class="dot"></div>
                             </div>
@@ -71,7 +71,7 @@
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-primary" data-dismiss="modal" type="button"
-                            onclick="saveLabels(); selectItemsToBeDisplayed()">Salva e
+                            onclick="saveLabels()">Salva e
                         chiudi
                     </button>
                 </div>
