@@ -1,0 +1,11 @@
+#map {
+    position: fixed;
+}
+
+.modal-dialog{
+    overflow-y: initial !important
+}
+.modal-body{
+    height: 600px;
+    overflow-y: auto;
+}

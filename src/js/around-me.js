@@ -1,8 +1,10 @@
-let vue = new Vue({
-    el: '#map',
+const vue = new Vue({
+    el: '#some',
     data: {
         saved_markers: [],
         checked_labels: [],
+        checkLabels: [],
+        allSelected: false
     },
     methods: {
         addMarker(marker) {
@@ -24,6 +26,25 @@ let vue = new Vue({
         },
         addList(list) {
             this.checked_labels = list;
+        },
+        getList() {
+            let smt = this.checkLabels;
+            for (let s in smt) {
+                smt[s] = smt[s].replace(/ /g, "_");
+            }
+            return smt;
+        },
+        selectAll() {
+            this.checkLabels = [];
+
+            if (!this.allSelected) {
+                for (const label in this.checked_labels) {
+                    this.checkLabels.push(this.checked_labels[label])
+                }
+            }
+        },
+        select() {
+            this.allSelected = false;
         }
     }
 });
@@ -31,6 +52,7 @@ let vue = new Vue({
 let circleLayer = undefined;
 let circleFigure = undefined;
 let specialMarkerList = new Map();
+let savedLayers = new Set();
 
 let map = L.map('map', {
     center: [45.0709823, 7.6777233],
@@ -71,7 +93,7 @@ const customTranslation = {
 };
 map.pm.setLang('lensChange', customTranslation, 'it');
 
-function clickHandler(e) {
+async function clickHandler(e) {
     if (e.layer.getRadius() > 450) {
         attivaToast("Il cerchio è troppo grande, riprova!", "error", "#e74c3c");
         map.removeLayer(e.layer)
@@ -89,9 +111,14 @@ function clickHandler(e) {
 let mappaColori = new Map();
 let mappaMarker = new Map();
 let labelSet;
+let selectedLabelSet = [];
 let colorRequest;
 
 function jqueryRequest(e) {
+    vue.checkLabels = []; // We want to reset the current checkLabel list for the new entries
+    vue.allSelected = false; // We also want to preserve allSelected logic integrity
+    savedLayers = new Set(); // Now we reset the savedLayers to diff between previous and current layers
+
     $.get("https://beta.ontomap.ontomap.eu/features?lat=" + e.getLatLng().lat + "&lng=" + e.getLatLng().lng + "&maxDistance=" + e.getRadius(), function (geoJsonFeature) {
         labelSet = new Set();
         geoJsonFeature.features.forEach((item, i) => {
@@ -127,14 +154,13 @@ function jqueryRequest(e) {
                                 editable: false
                             });
                         else layer.setIcon(icon);
+                        layer.otmClass = mappaColori.get(item.properties.label).otmClass;
+                        layer.selected = false;
                     });
                     let link = $('<div style="overflow: hidden"><b>' + item.properties.label + '</b></div>').append($('<br><div style="text-align: center; float: left"><img id="saved" src="https://evilscript.altervista.org/images/star.png" alt="Salva posizione"></div>').click(function () {
                         if (layer.myTag !== "favorite") {
 
-
-                            vue.addMarker(layer);
-                            vue.printMarkers();
-
+                            vue.addMarker(layer); // TODO: this is a stub
 
                             $("#saved").attr('src', "https://evilscript.altervista.org/images/iconfinder_star_285661.svg");
                             layer.myTag = "favorite";
@@ -157,8 +183,7 @@ function jqueryRequest(e) {
                             attivaToast("Posizione salvata", "info", "#2980b9");
                         } else {
 
-                            vue.removeMarker(layer);
-                            vue.printMarkers();
+                            vue.removeMarker(layer); // TODO: this is the other stub, same as before
 
                             $("#saved").attr('src', "https://evilscript.altervista.org/images/star.png");
                             layer.myTag = "circleLayer";
@@ -184,13 +209,13 @@ function jqueryRequest(e) {
             filterButton.addTo(map);
             $('#filtraOggetti').modal('show');
         });
+
         $.when(colorRequest).done(function () {
             let text = Array.from(labelSet);
             for (let t in text) {
                 text[t] = text[t].replace(/_/g, " ");
             }
             vue.addList(text);
-            //$('#filtraOggetti .modal-body').text(text);
         });
     });
 }
@@ -227,6 +252,31 @@ function attivaToast(dati, cond, bgColor) {
         loader: true,
         loaderBg: '#9EC600',
         bgColor: bgColor,
+    });
+}
+
+function saveLabels() {
+    selectedLabelSet = vue.getList();
+    console.log(selectedLabelSet);
+}
+
+function selectItemsToBeDisplayed() {
+    savedLayers.forEach(function (l) {
+        if (l.selected === true) {
+            console.log(l);
+            map.addLayer(l);
+            l.selected = false;
+        }
+    });
+
+    map.eachLayer(function (layer) {
+        if (layer.hasOwnProperty('otmClass') && !selectedLabelSet.includes(layer.otmClass)) {
+            if (layer.myTag !== "favorite" && layer.selected !== true) {
+                map.removeLayer(layer);
+                layer.selected = true;
+                savedLayers.add(layer);
+            }
+        }
     });
 }
 
