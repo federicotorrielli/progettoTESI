@@ -2,6 +2,7 @@ let vue = new Vue({
     el: '#map',
     data: {
         saved_markers: [],
+        checked_labels: [],
     },
     methods: {
         addMarker(marker) {
@@ -13,6 +14,16 @@ let vue = new Vue({
         },
         printMarkers() {
             console.log(this.saved_markers);
+        },
+        addItem(item) {
+            this.checked_labels.push(item);
+        },
+        removeItem(item) {
+            let i = this.checked_labels.map(items => items.id).indexOf(item);
+            this.checked_labels.splice(i, 1);
+        },
+        addList(list) {
+            this.checked_labels = list;
         }
     }
 });
@@ -172,10 +183,14 @@ function jqueryRequest(e) {
             map.pm.enableGlobalDragMode();
             filterButton.addTo(map);
             $('#filtraOggetti').modal('show');
-            $.when(colorRequest).done(function () {
-                let text = Array.from(labelSet).join("\n").replace(/_/g," ");
-                $('#filtraOggetti .modal-body').text(text);
-            });
+        });
+        $.when(colorRequest).done(function () {
+            let text = Array.from(labelSet);
+            for (let t in text) {
+                text[t] = text[t].replace(/_/g, " ");
+            }
+            vue.addList(text);
+            //$('#filtraOggetti .modal-body').text(text);
         });
     });
 }
