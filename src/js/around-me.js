@@ -141,6 +141,10 @@ function jqueryRequest(e) {
         });
         geoJsonFeature.features.forEach((item, i) => {
             let circle = turf.circle([e.getLatLng().lng, e.getLatLng().lat], e.getRadius() / 1000);
+            if(item.geometry.type === "MultiPoint") {
+                item.geometry.type = "Point";
+                item.geometry.coordinates = item.geometry.coordinates[0];
+            }
             let intersect = turf.intersect(circle, item);
             circleLayer = L.geoJSON(intersect, {
                 onEachFeature(feature, layer) {
