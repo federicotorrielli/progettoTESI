@@ -125,10 +125,12 @@ function jqueryRequest(e) {
     vue.checkLabels = []; // We want to reset the current checkLabel list for the new entries
     vue.allSelected = false; // We also want to preserve allSelected logic integrity
     savedLayers = new Set(); // Now we reset the savedLayers to diff between previous and current layers
+    let geojsonReader = new jsts.io.GeoJSONReader();
+    let geojsonWriter = new jsts.io.GeoJSONWriter();
 
     $.get("https://beta.ontomap.ontomap.eu/features?lat=" + e.getLatLng().lat + "&lng=" + e.getLatLng().lng + "&maxDistance=" + e.getRadius(), function (geoJsonFeature) {
         labelSet = new Set();
-        geoJsonFeature.features.forEach((item, i) => {
+        geoJsonFeature.features.forEach(item => {
             colorRequest = $.get("https://beta.ontomap.ontomap.eu/concepts/" + item.properties.otmClass + "/info",
                 function (value) {
                     value.otmClass = item.properties.otmClass;
@@ -139,16 +141,27 @@ function jqueryRequest(e) {
                 }
             );
         });
-        geoJsonFeature.features.forEach((item, i) => {
-            let circle = turf.circle([e.getLatLng().lng, e.getLatLng().lat], e.getRadius() / 1000);
-            if(item.geometry.type === "MultiPoint") {
+        const circle = turf.circle([e.getLatLng().lng, e.getLatLng().lat], e.getRadius() / 1000);
+        let circleGeom = geojsonReader.read(circle);
+        geoJsonFeature.features.forEach(item => {
+            if (item.geometry.type === "MultiPoint") {
                 item.geometry.type = "Point";
                 item.geometry.coordinates = item.geometry.coordinates[0];
             }
-            let intersect = turf.intersect(circle, item);
-            circleLayer = L.geoJSON(intersect, {
+            let geom = geojsonReader.read(item);
+            const intersect = circleGeom.geometry.intersection(geom.geometry);
+            if (!intersect) {
+                return;
+            } else {
+                geom = geojsonWriter.write(intersect);
+                item.geometry = geom;
+            }
+
+            circleLayer = L.geoJSON(geom, {
                 onEachFeature(feature, layer) {
                     let icon;
+                    layer.uniqueID = '_' + Math.random().toString(36).substr(2, 9);
+
                     $.when(colorRequest).done(function (v1) {
                         if (mappaMarker.get(item.properties.label) != null)
                             icon = new L.icon({
@@ -169,6 +182,13 @@ function jqueryRequest(e) {
                         layer.selected = false;
                     });
                     let link = $('<div style="overflow: hidden"><b>' + item.properties.label + '</b></div>').append($('<br><div style="text-align: center; float: left"><img id="saved" src="https://evilscript.altervista.org/images/star.png" alt="Salva posizione"></div>').click(function () {
+                        let layerCentre;
+                        if (!layer.hasOwnProperty("_icon")) {
+                            layerCentre = Object.is(layer.getLatLngs()[0][0], undefined) ? layer.getCenter() : layer.getLatLngs()[0][0];
+                            if (layerCentre.length > 1)
+                                layerCentre = layerCentre[0];
+                        }
+
                         if (layer.myTag !== "favorite") {
 
                             vue.addMarker(layer); // TODO: this is a stub
@@ -176,7 +196,7 @@ function jqueryRequest(e) {
                             $("#saved").attr('src', "https://evilscript.altervista.org/images/iconfinder_star_285661.svg");
                             layer.myTag = "favorite";
                             if (layer.options.color !== undefined) {
-                                specialMarkerList.set(layer.getLatLngs()[0][0], new L.marker(layer.getLatLngs()[0][0], {
+                                specialMarkerList.set(layer.uniqueID, new L.marker(layerCentre, {
                                     icon: new L.Icon({
                                         iconUrl: 'https://evilscript.altervista.org/images/marker-icon-starred.png',
                                         iconSize: [25, 41],
@@ -199,8 +219,8 @@ function jqueryRequest(e) {
                             $("#saved").attr('src', "https://evilscript.altervista.org/images/star.png");
                             layer.myTag = "circleLayer";
                             if (layer.options.color !== undefined) {
-                                map.removeLayer(specialMarkerList.get(layer.getLatLngs()[0][0]));
-                                specialMarkerList.delete(layer.getLatLngs()[0][0]);
+                                map.removeLayer(specialMarkerList.get(layer.uniqueID));
+                                specialMarkerList.delete(layer.uniqueID);
                             } else
                                 layer.setIcon(icon);
                             attivaToast("Posizione cancellata", "info", "#e74c3c");
