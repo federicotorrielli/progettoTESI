@@ -11,6 +11,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" rel="stylesheet">
     <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
           integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" rel="stylesheet">
+    <link href="css/spinner.css" rel="stylesheet"/>
     <link href="css/toggle-button.css" rel="stylesheet"/>
     <link href="css/main.css" rel="stylesheet"/>
     <script crossorigin="anonymous"
@@ -33,7 +34,6 @@
     <title>Intorno a me: Mappa di Torino</title>
 </head>
 <body>
-
 <div id="map"></div>
 <div id="some">
     <div aria-hidden="true" aria-labelledby="filtraOggettiLabel" class="modal fade" id="filtraOggetti" role="dialog"
@@ -41,7 +41,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="filtraOggettiLabel">Filtra gli oggetti nella lente</h5>
+                    <h5 class="modal-title" id="filtraOggettiLabel">Seleziona le informazioni da visualizzare</h5>
                     <button aria-label="Close" class="close" data-dismiss="modal" type="button">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -78,6 +78,11 @@
             </div>
         </div>
     </div>
+</div>
+<div id="spinner">
+    <svg class="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+        <circle class="path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
+    </svg>
 </div>
 
 <!-- Scripts at the end of the page makes the page loads faster while mantaining render style correctly -->

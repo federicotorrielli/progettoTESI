@@ -25,14 +25,14 @@ const vue = new Vue({
             this.checked_labels.splice(i, 1);
         },
         addList(list) {
-            this.checked_labels = list;
+            this.checked_labels = list.sort();
         },
         getList() {
             let smt = this.checkLabels;
             for (let s in smt) {
                 smt[s] = smt[s].replace(/ /g, "_");
             }
-            return smt;
+            return smt
         },
         selectAll() {
             this.checkLabels = [];
@@ -62,7 +62,7 @@ let specialMarkerList = new Map();
 let savedLayers = new Set();
 
 let map = L.map('map', {
-    center: [45.0709823, 7.6777233],
+    center: [45.066277, 7.675744],
     minZoom: 2,
     zoom: 15
 });
@@ -101,7 +101,7 @@ const customTranslation = {
 map.pm.setLang('lensChange', customTranslation, 'it');
 
 async function clickHandler(e) {
-    if (e.layer.getRadius() > 450) {
+    if (e.layer.getRadius() > 370) {
         attivaToast("Il cerchio è troppo grande, riprova!", "error", "#e74c3c");
         map.removeLayer(e.layer)
         return;
@@ -117,7 +117,7 @@ async function clickHandler(e) {
 
 let mappaColori = new Map();
 let mappaMarker = new Map();
-let labelSet;
+let propSet;
 let selectedLabelSet = [];
 let colorRequest;
 
@@ -129,18 +129,23 @@ function jqueryRequest(e) {
     let geojsonWriter = new jsts.io.GeoJSONWriter();
 
     $.get("https://beta.ontomap.ontomap.eu/features?lat=" + e.getLatLng().lat + "&lng=" + e.getLatLng().lng + "&maxDistance=" + e.getRadius(), function (geoJsonFeature) {
-        labelSet = new Set();
+        propSet = new Set();
+
         geoJsonFeature.features.forEach(item => {
-            colorRequest = $.get("https://beta.ontomap.ontomap.eu/concepts/" + item.properties.otmClass + "/info",
+            propSet.add(item.properties.otmClass);
+        });
+
+        propSet.forEach(val => {
+            colorRequest = $.get("https://beta.ontomap.ontomap.eu/concepts/" + val + "/info",
                 function (value) {
-                    value.otmClass = item.properties.otmClass;
-                    mappaColori.set(item.properties.label, value);
+                    value.otmClass = val;
+                    mappaColori.set(val, value);
                     if (value.hasOwnProperty('icon'))
-                        mappaMarker.set(item.properties.label, value)
-                    labelSet.add(item.properties.otmClass);
+                        mappaMarker.set(val, value)
                 }
             );
-        });
+        })
+
         const circle = turf.circle([e.getLatLng().lng, e.getLatLng().lat], e.getRadius() / 1000);
         let circleGeom = geojsonReader.read(circle);
         geoJsonFeature.features.forEach(item => {
@@ -162,23 +167,28 @@ function jqueryRequest(e) {
                     let icon;
                     layer.uniqueID = '_' + Math.random().toString(36).substr(2, 9);
 
-                    $.when(colorRequest).done(function (v1) {
-                        if (mappaMarker.get(item.properties.label) != null)
+                    $.when(colorRequest).done(function () {
+                        if (mappaMarker.get(item.properties.otmClass) != null)
                             icon = new L.icon({
-                                iconUrl: "https://beta.ontomap.ontomap.eu" + mappaMarker.get(item.properties.label).icon,
-                                iconRetinaUrl: "https://beta.ontomap.ontomap.eu" + mappaMarker.get(item.properties.label).iconRetina,
+                                iconUrl: "https://beta.ontomap.ontomap.eu" + mappaMarker.get(item.properties.otmClass).icon,
+                                iconRetinaUrl: "https://beta.ontomap.ontomap.eu" + mappaMarker.get(item.properties.otmClass).iconRetina,
                                 iconSize: [25, 41],
                                 iconAnchor: [12, 40],
                                 popupAnchor: [1, -38]
                             });
-                        if (icon === undefined || layer.setIcon === undefined)
-                            layer.setStyle({
-                                color: mappaColori.get(item.properties.label).color,
-                                fillOpacity: 0.9,
-                                editable: false
-                            });
-                        else layer.setIcon(icon);
-                        layer.otmClass = mappaColori.get(item.properties.label).otmClass;
+                        if (icon === undefined || layer.setIcon === undefined) {
+                            if (mappaColori.get(item.properties.otmClass) !== undefined && mappaColori.get(item.properties.otmClass).hasOwnProperty("color"))
+                                layer.setStyle({
+                                    color: mappaColori.get(item.properties.otmClass).color,
+                                    fillOpacity: 0.9,
+                                    editable: false
+                                });
+                        } else layer.setIcon(icon);
+                        try {
+                            layer.otmClass = mappaColori.get(item.properties.otmClass).otmClass;
+                        } catch (e) {
+                            map.removeLayer(layer);
+                        }
                         layer.selected = false;
                     });
                     let link = $('<div style="overflow: hidden"><b>' + item.properties.label + '</b></div>').append($('<br><div style="text-align: center; float: left"><img id="saved" src="https://evilscript.altervista.org/images/star.png" alt="Salva posizione"></div>').click(function () {
@@ -235,15 +245,19 @@ function jqueryRequest(e) {
                     layer._dragDisabled = true;
                 }
             });
-            circleLayer.addTo(map);
             map.pm.enableGlobalDragMode();
             filterButton.addTo(map);
+            map.addLayer(circleLayer);
             $('#filtraOggetti').modal('show');
         });
 
         $.when(colorRequest).done(function () {
-            let text = Array.from(labelSet);
-            for (let t in text) {
+            cleanLayers();
+            let text = [];
+            propSet.forEach((val) => {
+                text.push(val);
+            })
+            for (const t in text) {
                 text[t] = text[t].replace(/_/g, " ");
             }
             vue.addList(text);
@@ -287,7 +301,6 @@ function attivaToast(dati, cond, bgColor) {
 }
 
 function saveLabels() {
-    // TODO: il dismiss del modal deve far partire comunque questa funzione
     selectedLabelSet = vue.getList();
     selectItemsToBeDisplayed();
 }
@@ -311,6 +324,18 @@ function selectItemsToBeDisplayed() {
     });
 }
 
+function cleanLayers() {
+    map.eachLayer(function (layer) {
+        if (layer.hasOwnProperty('otmClass') && !selectedLabelSet.includes(layer.otmClass)) {
+            if (layer.myTag !== "favorite") {
+                map.removeLayer(layer);
+                layer.selected = true;
+                savedLayers.add(layer);
+            }
+        }
+    });
+}
+
 let filterButton = L.easyButton({
     states: [{
         stateName: 'startState',
@@ -324,6 +349,9 @@ let filterButton = L.easyButton({
 
 map.on('pm:create', e => clickHandler(e), {passive: true});
 map.on('pm:remove', e => removalHandler(e), {passive: true});
+$("#filtraOggetti").on("hidden.bs.modal", function () {
+    saveLabels();
+})
 map.pm.Draw.Circle._syncCircleRadius = function _syncCircleRadius() {
 
     let A = this._centerMarker.getLatLng();
@@ -331,7 +359,20 @@ map.pm.Draw.Circle._syncCircleRadius = function _syncCircleRadius() {
     let B = this._hintMarker.getLatLng();
 
     let distance = A.distanceTo(B);
-    if (distance < 450) {
+    if (distance < 370) {
         this._layer.setRadius(distance);
     }
 }
+
+// Updatable spinner with jquery
+const $loading = $('#spinner').hide();
+/*
+$(document)
+    .ajaxStart(function () {
+        $loading.show();
+    })
+    .ajaxStop(function () {
+        $loading.hide();
+    });
+
+ */
