@@ -86,6 +86,11 @@ map.pm.addControls({
     cutPolygon: false,
 });
 
+// Aggiungiamo per la demo i due marker su porta nuova e porta susa
+
+L.marker([45.062464,7.678805]).bindPopup("Torino Porta Nuova").addTo(map);
+L.marker([45.071154,7.666032]).bindPopup("Torino Porta Susa").addTo(map);
+
 const customTranslation = {
     buttonTitles: {
         drawCircleButton: 'Clicca per attivare la lente di esplorazione, poi seleziona il punto della mappa su cui posizionarla'
