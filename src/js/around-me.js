@@ -88,8 +88,8 @@ map.pm.addControls({
 
 // Aggiungiamo per la demo i due marker su porta nuova e porta susa
 
-L.marker([45.062464,7.678805]).bindPopup("Torino Porta Nuova").addTo(map);
-L.marker([45.071154,7.666032]).bindPopup("Torino Porta Susa").addTo(map);
+L.marker([45.062464, 7.678805]).bindPopup("Torino Porta Nuova").addTo(map);
+L.marker([45.071154, 7.666032]).bindPopup("Torino Porta Susa").addTo(map);
 
 const customTranslation = {
     buttonTitles: {
@@ -151,109 +151,13 @@ function jqueryRequest(e) {
             );
         })
 
-        const circle = turf.circle([e.getLatLng().lng, e.getLatLng().lat], e.getRadius() / 1000);
-        let circleGeom = geojsonReader.read(circle);
-        geoJsonFeature.features.forEach(item => {
-            if (item.geometry.type === "MultiPoint") {
-                item.geometry.type = "Point";
-                item.geometry.coordinates = item.geometry.coordinates[0];
-            }
-            let geom = geojsonReader.read(item);
-            const intersect = circleGeom.geometry.intersection(geom.geometry);
-            if (!intersect) {
-                return;
-            } else {
-                geom = geojsonWriter.write(intersect);
-                item.geometry = geom;
-            }
+        let circle;
+        const turfrequest = $.getScript("https://cdn.jsdelivr.net/npm/@turf/turf@5/turf.min.js", function () {
+            circle = turf.circle([e.getLatLng().lng, e.getLatLng().lat], e.getRadius() / 1000);
+        })
 
-            circleLayer = L.geoJSON(geom, {
-                onEachFeature(feature, layer) {
-                    let icon;
-                    layer.uniqueID = '_' + Math.random().toString(36).substr(2, 9);
-
-                    $.when(colorRequest).done(function () {
-                        if (mappaMarker.get(item.properties.otmClass) != null)
-                            icon = new L.icon({
-                                iconUrl: "https://beta.ontomap.ontomap.eu" + mappaMarker.get(item.properties.otmClass).icon,
-                                iconRetinaUrl: "https://beta.ontomap.ontomap.eu" + mappaMarker.get(item.properties.otmClass).iconRetina,
-                                iconSize: [25, 41],
-                                iconAnchor: [12, 40],
-                                popupAnchor: [1, -38]
-                            });
-                        if (icon === undefined || layer.setIcon === undefined) {
-                            if (mappaColori.get(item.properties.otmClass) !== undefined && mappaColori.get(item.properties.otmClass).hasOwnProperty("color"))
-                                layer.setStyle({
-                                    color: mappaColori.get(item.properties.otmClass).color,
-                                    fillOpacity: 0.9,
-                                    editable: false
-                                });
-                        } else layer.setIcon(icon);
-                        try {
-                            layer.otmClass = mappaColori.get(item.properties.otmClass).otmClass;
-                        } catch (e) {
-                            map.removeLayer(layer);
-                        }
-                        layer.selected = false;
-                    });
-                    let link = $('<div style="overflow: hidden"><b>' + item.properties.label + '</b></div>').append($('<br><div style="text-align: center; float: left"><img id="saved" src="https://evilscript.altervista.org/images/star.png" alt="Salva posizione"></div>').click(function () {
-                        let layerCentre;
-                        if (!layer.hasOwnProperty("_icon")) {
-                            layerCentre = Object.is(layer.getLatLngs()[0][0], undefined) ? layer.getCenter() : layer.getLatLngs()[0][0];
-                            if (layerCentre.length > 1)
-                                layerCentre = layerCentre[0];
-                        }
-
-                        if (layer.myTag !== "favorite") {
-
-                            vue.addMarker(layer); // TODO: this is a stub
-
-                            $("#saved").attr('src', "https://evilscript.altervista.org/images/iconfinder_star_285661.svg");
-                            layer.myTag = "favorite";
-                            if (layer.options.color !== undefined) {
-                                specialMarkerList.set(layer.uniqueID, new L.marker(layerCentre, {
-                                    icon: new L.Icon({
-                                        iconUrl: 'https://evilscript.altervista.org/images/marker-icon-starred.png',
-                                        iconSize: [25, 41],
-                                        iconAnchor: [12, 40],
-                                        popupAnchor: [1, -38],
-                                    }), title: item.properties.label
-                                }).addTo(map).bindPopup(L.responsivePopup({maxHeight: 200}, layer).setContent(link)));
-                            } else
-                                layer.setIcon(new L.Icon({
-                                    iconUrl: 'https://evilscript.altervista.org/images/marker-icon-starred.png',
-                                    iconSize: [25, 41],
-                                    iconAnchor: [12, 40],
-                                    popupAnchor: [1, -38],
-                                }));
-                            attivaToast("Posizione salvata", "info", "#2980b9");
-                        } else {
-
-                            vue.removeMarker(layer); // TODO: this is the other stub, same as before
-
-                            $("#saved").attr('src', "https://evilscript.altervista.org/images/star.png");
-                            layer.myTag = "circleLayer";
-                            if (layer.options.color !== undefined) {
-                                map.removeLayer(specialMarkerList.get(layer.uniqueID));
-                                specialMarkerList.delete(layer.uniqueID);
-                            } else
-                                layer.setIcon(icon);
-                            attivaToast("Posizione cancellata", "info", "#e74c3c");
-                        }
-                    })).append('<div style="float: right"><img src="https://evilscript.altervista.org/images/iconfinder_sign-info_299086.svg"/></div>')[0];
-                    if (layer.myTag === undefined)
-                        layer.myTag = "circleLayer";
-                    layer.bindPopup(L.responsivePopup({maxHeight: 200}, layer).setContent(link));
-
-                    // Questi due attributi disattivano il trascinamento dei marker sulla mappa
-                    layer._pmTempLayer = true;
-                    layer._dragDisabled = true;
-                }
-            });
-            map.pm.enableGlobalDragMode();
-            filterButton.addTo(map);
-            map.addLayer(circleLayer);
-            $('#filtraOggetti').modal('show');
+        $.when(turfrequest).done(function () {
+            circlePlacement(geojsonReader, geojsonWriter, circle, geoJsonFeature);
         });
 
         $.when(colorRequest).done(function () {
@@ -267,6 +171,112 @@ function jqueryRequest(e) {
             }
             vue.addList(text);
         });
+    });
+}
+
+function circlePlacement(geojsonReader, geojsonWriter, circle, geoJsonFeature) {
+    let circleGeom = geojsonReader.read(circle);
+    geoJsonFeature.features.forEach(item => {
+        if (item.geometry.type === "MultiPoint") {
+            item.geometry.type = "Point";
+            item.geometry.coordinates = item.geometry.coordinates[0];
+        }
+        let geom = geojsonReader.read(item);
+        const intersect = circleGeom.geometry.intersection(geom.geometry);
+        if (!intersect) {
+            return;
+        } else {
+            geom = geojsonWriter.write(intersect);
+            item.geometry = geom;
+        }
+
+        circleLayer = L.geoJSON(geom, {
+            onEachFeature(feature, layer) {
+                let icon;
+                layer.uniqueID = '_' + Math.random().toString(36).substr(2, 9);
+
+                $.when(colorRequest).done(function () {
+                    if (mappaMarker.get(item.properties.otmClass) != null)
+                        icon = new L.icon({
+                            iconUrl: "https://beta.ontomap.ontomap.eu" + mappaMarker.get(item.properties.otmClass).icon,
+                            iconRetinaUrl: "https://beta.ontomap.ontomap.eu" + mappaMarker.get(item.properties.otmClass).iconRetina,
+                            iconSize: [25, 41],
+                            iconAnchor: [12, 40],
+                            popupAnchor: [1, -38]
+                        });
+                    if (icon === undefined || layer.setIcon === undefined) {
+                        if (mappaColori.get(item.properties.otmClass) !== undefined && mappaColori.get(item.properties.otmClass).hasOwnProperty("color"))
+                            layer.setStyle({
+                                color: mappaColori.get(item.properties.otmClass).color,
+                                fillOpacity: 0.9,
+                                editable: false
+                            });
+                    } else layer.setIcon(icon);
+                    try {
+                        layer.otmClass = mappaColori.get(item.properties.otmClass).otmClass;
+                    } catch (e) {
+                        map.removeLayer(layer);
+                    }
+                    layer.selected = false;
+                });
+                let link = $('<div style="overflow: hidden"><b>' + item.properties.label + '</b></div>').append($('<br><div style="text-align: center; float: left"><img id="saved" src="https://evilscript.altervista.org/images/star.png" alt="Salva posizione" style="cursor: pointer"></div>').click(function () {
+                    let layerCentre;
+                    if (!layer.hasOwnProperty("_icon")) {
+                        layerCentre = Object.is(layer.getLatLngs()[0][0], undefined) ? layer.getCenter() : layer.getLatLngs()[0][0];
+                        if (layerCentre.length > 1)
+                            layerCentre = layerCentre[0];
+                    }
+
+                    if (layer.myTag !== "favorite") {
+
+                        vue.addMarker(layer); // TODO: this is a stub
+
+                        $("#saved").attr('src', "https://evilscript.altervista.org/images/iconfinder_star_285661.svg");
+                        layer.myTag = "favorite";
+                        if (layer.options.color !== undefined) {
+                            specialMarkerList.set(layer.uniqueID, new L.marker(layerCentre, {
+                                icon: new L.Icon({
+                                    iconUrl: 'https://evilscript.altervista.org/images/marker-icon-starred.png',
+                                    iconSize: [25, 41],
+                                    iconAnchor: [12, 40],
+                                    popupAnchor: [1, -38],
+                                }), title: item.properties.label
+                            }).addTo(map).bindPopup(L.responsivePopup({maxHeight: 200}, layer).setContent(link)));
+                        } else
+                            layer.setIcon(new L.Icon({
+                                iconUrl: 'https://evilscript.altervista.org/images/marker-icon-starred.png',
+                                iconSize: [25, 41],
+                                iconAnchor: [12, 40],
+                                popupAnchor: [1, -38],
+                            }));
+                        attivaToast("Posizione salvata", "info", "#2980b9");
+                    } else {
+
+                        vue.removeMarker(layer); // TODO: this is the other stub, same as before
+
+                        $("#saved").attr('src', "https://evilscript.altervista.org/images/star.png");
+                        layer.myTag = "circleLayer";
+                        if (layer.options.color !== undefined) {
+                            map.removeLayer(specialMarkerList.get(layer.uniqueID));
+                            specialMarkerList.delete(layer.uniqueID);
+                        } else
+                            layer.setIcon(icon);
+                        attivaToast("Posizione cancellata", "info", "#e74c3c");
+                    }
+                })).append('<div style="float: right"><img src="https://evilscript.altervista.org/images/iconfinder_sign-info_299086.svg"/></div>')[0];
+                if (layer.myTag === undefined)
+                    layer.myTag = "circleLayer";
+                layer.bindPopup(L.responsivePopup({maxHeight: 200}, layer).setContent(link));
+
+                // Questi due attributi disattivano il trascinamento dei marker sulla mappa
+                layer._pmTempLayer = true;
+                layer._dragDisabled = true;
+            }
+        });
+        map.pm.enableGlobalDragMode();
+        filterButton.addTo(map);
+        map.addLayer(circleLayer);
+        $('#filtraOggetti').modal('show');
     });
 }
 
