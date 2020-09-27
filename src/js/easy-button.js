@@ -1,14 +1,14 @@
 (function () {
 
-// This is for grouping buttons into a bar
-// takes an array of `L.easyButton`s and
-// then the usual `.addTo(map)`
+    // This is for grouping buttons into a bar
+    // takes an array of `L.easyButton`s and
+    // then the usual `.addTo(map)`
     L.Control.EasyBar = L.Control.extend({
 
         options: {
-            position: 'topright',  // part of leaflet's defaults
-            id: null,       // an id to tag the Bar with
-            leafletClasses: true        // use leaflet classes?
+            position: 'topright', // part of leaflet's defaults
+            id: null, // an id to tag the Bar with
+            leafletClasses: true // use leaflet classes?
         },
 
 
@@ -87,31 +87,31 @@
         for (var i = 0; i < arguments.length; i++) {
             args.push(arguments[i]);
         }
-        return new (Function.prototype.bind.apply(L.Control.EasyBar, args));
+        return new(Function.prototype.bind.apply(L.Control.EasyBar, args));
     };
 
-// L.EasyButton is the actual buttons
-// can be called without being grouped into a bar
+    // L.EasyButton is the actual buttons
+    // can be called without being grouped into a bar
     L.Control.EasyButton = L.Control.extend({
 
         options: {
-            position: 'topright',       // part of leaflet's defaults
+            position: 'topright', // part of leaflet's defaults
 
-            id: null,            // an id to tag the button with
+            id: null, // an id to tag the button with
 
-            type: 'replace',       // [(replace|animate)]
-                                   // replace swaps out elements
-                                   // animate changes classes with all elements inserted
+            type: 'replace', // [(replace|animate)]
+            // replace swaps out elements
+            // animate changes classes with all elements inserted
 
-            states: [],              // state names look like this
-                                     // {
-                                     //   stateName: 'untracked',
-                                     //   onClick: function(){ handle_nav_manually(); };
-                                     //   title: 'click to make inactive',
-                                     //   icon: 'fa-circle',    // wrapped with <a>
-                                     // }
+            states: [], // state names look like this
+            // {
+            //   stateName: 'untracked',
+            //   onClick: function(){ handle_nav_manually(); };
+            //   title: 'click to make inactive',
+            //   icon: 'fa-circle',    // wrapped with <a>
+            // }
 
-            leafletClasses: true,     // use leaflet styles for the button
+            leafletClasses: true, // use leaflet styles for the button
             tagName: 'button',
         },
 
@@ -314,9 +314,9 @@
 
     });
 
-    L.easyButton = function (/* args will pass automatically */) {
+    L.easyButton = function ( /* args will pass automatically */ ) {
         var args = Array.prototype.concat.apply([L.Control.EasyButton], arguments);
-        return new (Function.prototype.bind.apply(L.Control.EasyButton, args));
+        return new(Function.prototype.bind.apply(L.Control.EasyButton, args));
     };
 
     /*************************
@@ -325,8 +325,8 @@
      *
      *************************/
 
-// constructor for states so only curated
-// states end up getting called
+    // constructor for states so only curated
+    // states end up getting called
     function State(template, easyButton) {
 
         this.title = template.title;
@@ -337,8 +337,7 @@
 
         L.DomUtil.addClass(this.icon, 'button-state state-' + this.stateName.replace(/(^\s*|\s*$)/g, ''));
         this.icon.innerHTML = buildIcon(template.icon);
-        this.onClick = L.Util.bind(template.onClick ? template.onClick : function () {
-        }, easyButton);
+        this.onClick = L.Util.bind(template.onClick ? template.onClick : function () {}, easyButton);
     }
 
     function buildIcon(ambiguousIconString) {

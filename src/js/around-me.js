@@ -240,8 +240,11 @@ function circlePlacement(geojsonReader, geojsonWriter, circle, geoJsonFeature) {
                                     iconSize: [25, 41],
                                     iconAnchor: [12, 40],
                                     popupAnchor: [1, -38],
-                                }), title: item.properties.label
-                            }).addTo(map).bindPopup(L.responsivePopup({maxHeight: 200}, layer).setContent(link)));
+                                }),
+                                title: item.properties.label
+                            }).addTo(map).bindPopup(L.responsivePopup({
+                                maxHeight: 200
+                            }, layer).setContent(link)));
                         } else
                             layer.setIcon(new L.Icon({
                                 iconUrl: 'https://evilscript.altervista.org/images/marker-icon-starred.png',
@@ -266,7 +269,9 @@ function circlePlacement(geojsonReader, geojsonWriter, circle, geoJsonFeature) {
                 })).append('<div style="float: right"><img src="https://evilscript.altervista.org/images/iconfinder_sign-info_299086.svg"/></div>')[0];
                 if (layer.myTag === undefined)
                     layer.myTag = "circleLayer";
-                layer.bindPopup(L.responsivePopup({maxHeight: 200}, layer).setContent(link));
+                layer.bindPopup(L.responsivePopup({
+                    maxHeight: 200
+                }, layer).setContent(link));
 
                 // Questi due attributi disattivano il trascinamento dei marker sulla mappa
                 layer._pmTempLayer = true;
@@ -362,8 +367,12 @@ let filterButton = L.easyButton({
     }]
 });
 
-map.on('pm:create', e => clickHandler(e), {passive: true});
-map.on('pm:remove', e => removalHandler(e), {passive: true});
+map.on('pm:create', e => clickHandler(e), {
+    passive: true
+});
+map.on('pm:remove', e => removalHandler(e), {
+    passive: true
+});
 $("#filtraOggetti").on("hidden.bs.modal", function () {
     saveLabels();
 })
